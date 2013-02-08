@@ -173,7 +173,7 @@ function sevenday_pdf() {
   // 7-day health meter.
   $pdf->Image('https://chart.googleapis.com/chart?chf=bg,s,F0F0F0&chs=300x150&cht=gm&chco=333333,C64445|EBAE55|70A160&chd=t:80&chdlp=b&chma=|0,5#.png', 167, 23, 30);
   $pdf->Image('https://chart.googleapis.com/chart?chf=bg,s,FFFFFF&chs=250x150&cht=gm&chco=333333,C64445|EBAE55|70A160&chd=t:90&chdlp=b&chma=|0,5#.png', 10, 53, 15);
-  $pdf->Image('https://chart.googleapis.com/chart?chf=bg,s,FFFFFF&chs=250x150&cht=gm&chco=333333,C64445|EBAE55|70A160&chd=t:60&chdlp=b&chma=|0,5#.png', 10, 91, 15);
+  $pdf->Image('https://chart.googleapis.com/chart?chf=bg,s,FFFFFF&chs=250x150&cht=gm&chco=333333,C64445|EBAE55|70A160&chd=t:' . _sevenday_visitor_overview() . '&chdlp=b&chma=|0,5#.png', 10, 91, 15);
   $pdf->Image('https://chart.googleapis.com/chart?chf=bg,s,FFFFFF&chs=250x150&cht=gm&chco=333333,C64445|EBAE55|70A160&chd=t:90&chdlp=b&chma=|0,5#.png', 10, 154, 15);
   
   // Overview of registered users and posts.
@@ -334,4 +334,8 @@ function _sevenday_get_visits_by_hour() {
     'chart' => rtrim($chart_data,','),
     'biggest' => $biggest,
   );
+}
+
+function _sevenday_visitor_overview() {
+  return (_sevenday_get_total_visits()/_sevenday_get_total_visits(-15, -8))*100;
 }
