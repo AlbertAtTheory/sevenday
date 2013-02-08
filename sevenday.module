@@ -134,7 +134,7 @@ function sevenday_pdf() {
   $pdf->Text(75,84,'Total Posts');
   $pdf->Text(115,84,'In the Forum');
   $pdf->Text(34,124,'Articles Read');
-  $pdf->Text(95,124,'Total Visitors');
+  $pdf->Text(95,124,'Total Impressions');
   $pdf->Text(34,145,'Average Visit Length');
   $pdf->Text(95,145,'Mobile Visitors');
   $pdf->Text(34,188,'Page Impressions');
@@ -180,7 +180,7 @@ function sevenday_pdf() {
   $pdf->Image('https://chart.googleapis.com/chart?chxl=0:|Fr|Sa|Su|Mo|Tu|We|Th&chxr=0,-10,100&chxs=0,676767,12,0,lt,676767&chxt=x,y&chbh=a,7&chs=400x180&cht=bvs&chco=3E6D9C,71A261,ECAF56&chds=0,35,0,35,0,35&chd=t2:19,4,1,1,3,2,3|9,1,0,0,4,5,1|8,11,9,9,8,27,19&chdl=Forum+Posts|Other+Posts|Registrations&chdlp=b&chm=D,ECAF56,2,0,6,1#.png', 141, 62, 65);
   
   // Visitors by day of week.
-  $pdf->Image('http://chart.googleapis.com/chart?chxl=0:|Fr|Sa|Su|Mo|Tu|We|Th&chxr=0,-10,100&chxs=0,676767,12,0,lt,676767&chxt=x,y&chbh=a,7,9&chs=400x170&cht=bvg&chco=3E6D9C,71A261&chds=0,' . _sevenday_get_visits_by_day()['biggest'] . ',0,' . _sevenday_get_visits_by_day()['biggest'] . '&chxr=0,-10,100|1,0,' . _sevenday_get_visits_by_day()['biggest'] . '&chd=t:' . _sevenday_get_visits_by_day(TRUE)['chart'] . '|' . _sevenday_get_visits_by_day()['chart'] . '&chdl=Article+Reads|Pageviews&chdlp=b&chma=|0,10#.png', 141, 103, 65);
+  $pdf->Image('http://chart.googleapis.com/chart?chxl=0:|Fr|Sa|Su|Mo|Tu|We|Th&chxr=0,-10,100&chxs=0,676767,12,0,lt,676767&chxt=x,y&chbh=a,7,9&chs=400x170&cht=bvg&chco=3E6D9C,71A261&chds=0,' . _sevenday_get_visits_by_day()['biggest'] . ',0,' . _sevenday_get_visits_by_day()['biggest'] . '&chxr=0,-10,100|1,0,' . _sevenday_get_visits_by_day()['biggest'] . '&chd=t:' . _sevenday_get_visits_by_day(TRUE)['chart'] . '|' . _sevenday_get_visits_by_day()['chart'] . '&chdl=Article+Reads|Total+Impressions&chdlp=b&chma=|0,10#.png', 141, 103, 65);
 
   // Breakdown of visitors by time of day.
   $pdf->Image('http://chart.googleapis.com/chart?chxl=0:|AM|1|2|3|4|5|6|7|8|9|10|11|PM|1|2|3|4|5|6|7|8|9|10|11&chxt=x,y&chbh=a,7,10&chs=400x120&cht=bvs&chco=3E6D9C&chds=0,' . _sevenday_get_visits_by_hour()['biggest'] . '&chd=t:' . _sevenday_get_visits_by_hour()['chart'] . '&chxr=0,-10,100|1,0,' . _sevenday_get_visits_by_hour()['biggest'] . '&chdl=Visits+by+Hour&chdlp=b&chm=R,F1F0F0,0,0.335,0.795#.png', 141, 136, 65);
@@ -214,6 +214,27 @@ function sevenday_pdf() {
 	$pdf->Output();
 	
 	return;
+}
+
+function _sevenday_get_total_visits($start_date = -8, $end_date = -1, $articles_only = FALSE) {
+  $params = array(
+    'metrics' => array('ga:pageviews'),
+    'start_date' => strtotime($start_date . ' days'),
+    'end_date' => strtotime($end_date . ' day'),
+    'max_results' => 1,
+  );
+  
+  if ($articles_only) {
+    $params['filters'] = 'ga:pagePath=@/news';
+  }
+  
+  $feed = google_analytics_api_report_data($params);
+  
+  if ($feed->error) {
+    return FALSE;
+  }
+  
+  return $feed->results->rows[0]['pageviews'];
 }
 
 function _sevenday_get_top_referrers() {
@@ -266,6 +287,7 @@ function _sevenday_get_visits_by_day($articles_only = FALSE) {
   }
 
   $feed = google_analytics_api_report_data($params);
+  
   if ($feed->error) {
     return FALSE;
   }
@@ -295,6 +317,7 @@ function _sevenday_get_visits_by_hour() {
   );
 
   $feed = google_analytics_api_report_data($params);
+  
   if ($feed->error) {
     return FALSE;
   }
