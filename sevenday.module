@@ -183,7 +183,7 @@ function sevenday_pdf() {
   $pdf->Image('http://chart.googleapis.com/chart?chxl=0:|Fr|Sa|Su|Mo|Tu|We|Th&chxr=0,-10,100&chxs=0,676767,12,0,lt,676767&chxt=x,y&chbh=a,7,9&chs=400x170&cht=bvg&chco=3E6D9C,71A261&chds=0,' . _sevenday_get_visits_by_day()['biggest'] . ',0,' . _sevenday_get_visits_by_day()['biggest'] . '&chxr=0,-10,100|1,0,' . _sevenday_get_visits_by_day()['biggest'] . '&chd=t:' . _sevenday_get_visits_by_day(TRUE)['chart'] . '|' . _sevenday_get_visits_by_day()['chart'] . '&chdl=Article+Reads|Pageviews&chdlp=b&chma=|0,10#.png', 141, 103, 65);
 
   // Breakdown of visitors by time of day.
-  $pdf->Image('http://chart.googleapis.com/chart?chxl=0:|AM|1|2|3|4|5|6|7|8|9|10|11|PM|1|2|3|4|5|6|7|8|9|10|11&chxt=x,y&chbh=a,7,10&chs=400x120&cht=bvs&chco=3E6D9C&chds=0,255&chd=t:148,94,59,43,37,29,46,70,179,198,228,235,190,132,166,148,112,167,166,164,149,139,97,100&chdl=Visits+by+Hour&chdlp=b&chm=R,F1F0F0,0,0.335,0.795#.png', 141, 136, 65);
+  $pdf->Image('http://chart.googleapis.com/chart?chxl=0:|AM|1|2|3|4|5|6|7|8|9|10|11|PM|1|2|3|4|5|6|7|8|9|10|11&chxt=x,y&chbh=a,7,10&chs=400x120&cht=bvs&chco=3E6D9C&chds=0,' . _sevenday_get_visits_by_hour()['biggest'] . '&chd=t:' . _sevenday_get_visits_by_hour()['chart'] . '&chxr=0,-10,100|1,0,' . _sevenday_get_visits_by_hour()['biggest'] . '&chdl=Visits+by+Hour&chdlp=b&chm=R,F1F0F0,0,0.335,0.795#.png', 141, 136, 65);
   
   // Print the Top Referrers section.
   $pdf->SetFillColor(241, 241, 241);
@@ -264,6 +264,35 @@ function _sevenday_get_visits_by_day($articles_only = FALSE) {
   if ($articles_only) {
     $params['filters'] = 'ga:pagePath=@/news';
   }
+
+  $feed = google_analytics_api_report_data($params);
+  if ($feed->error) {
+    return FALSE;
+  }
+  
+  foreach ($feed->results->rows as $weekday) {
+    $chart_data .= $weekday['pageviews'] . ',';
+    
+    if ($biggest <= $weekday['pageviews']) {
+      $biggest = $weekday['pageviews'];
+    }
+  }
+  
+  return array(
+    'chart' => rtrim($chart_data,','),
+    'biggest' => $biggest,
+  );
+}
+
+function _sevenday_get_visits_by_hour() {
+  $params = array(
+    'metrics' => array('ga:pageviews'),
+    'dimensions' => array('ga:hour'),
+    'sort_metric' => array('ga:hour'),
+    'start_date' => strtotime('-8 days'),
+    'end_date' => strtotime('-1 day'),
+    'sort' => 'ga:hour',
+  );
 
   $feed = google_analytics_api_report_data($params);
   if ($feed->error) {
