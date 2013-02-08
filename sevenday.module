@@ -203,7 +203,10 @@ function sevenday_pdf() {
   $pdf->Cell(50,4,$referrers[4]['source'] . ' - ' . $referrers[4][visits],0,2,'C');
   
   // Print the Top Story section.
-  $pdf->Image('/web/theblock/sites/default/files/styles/600x250/public/articles/_BLOCK-ASSET-C7-Stingray-results.jpg', 155, 192, 50);
+  $article_path = drupal_get_normal_path(ltrim(_sevenday_get_top_article()[0]['pagePath'],'/'));
+  $article = menu_get_object('node', 1, $article_path);
+  
+  $pdf->Image(image_style_path('600x250', $article->field_image['und'][0]['uri']), 155, 192, 50);
   $pdf->SetXY(155,215);
   $pdf->SetFont('DroidSans', 'B', 7);
   $pdf->Cell(50,1,'Most Read Article - ' . _sevenday_get_top_article()[0]['pageviews'] . ' reads',0,0,'C');
@@ -239,7 +242,7 @@ function _sevenday_get_top_article() {
     'end_date' => strtotime('-1 day'),
     'sort' => '-ga:pageviews',
     'max_results' => 1,
-    'filter' => '/news',
+    'filters' => 'ga:pagePath=@/news',
   );
   $feed = google_analytics_api_report_data($params);
   if ($feed->error) {
