@@ -1,0 +1,231 @@
+<?php
+function sevenday_permission() {
+	return array(
+		'access seven day' => array(
+			'title' => t('Access Seven Day Report'),
+			'description' => t('Allow users to view seven day report PDF'),
+		),
+	);
+}
+
+function sevenday_menu() {
+	$items['admin/reports/sevenday.pdf'] = array(
+		'page callback' => 'sevenday_pdf',
+		'access arguments' => array('access printout'),
+		'type' => MENU_CALLBACK,
+	);
+
+	return $items;
+}
+
+function sevenday_pdf() {
+  global $user;
+  $site_name = variable_get('site_name');
+  $site_logo = '/web/theblock/sites/all/themes/theblock/logo-print.png'; 
+  
+  $referrers = _sevenday_get_top_referrers();
+
+	if ($path = libraries_get_path('fpdf')) {
+    define('FPDF_FONTPATH', drupal_get_path('module', 'sevenday') . '/fonts');
+    require($path . '/fpdf.php');
+		
+    class PDF extends FPDF {
+      function Header() {
+        $this->AddFont('DroidSans');
+        $this->AddFont('DroidSans', 'B');
+        $this->SetFont('DroidSans', 'B', 10);
+				
+				$this->SetFillColor(51,51,51);
+				$this->SetTextColor(210,210,210);
+				$this->Cell(195, 10, variable_get('site_name') . ' Performance Summary ' . date('m/d/Y', time() - 60 * 60 * 24 * 8) . ' to ' . date('m/d/Y', time() - 60 * 60 * 24), 0, 2, 'C', 'true');
+			}
+			function Footer() {
+				$this->SetFont('DroidSans', '', 8);
+				
+				$this->SetFillColor(51,51,51);
+				$this->SetTextColor(210,210,210);
+				$this->SetY(-20);
+				$this->Cell(195, 10, 'Data prepared on ' . date('m/d/Y') . ' by Theory Communication & Design', 0, 2, 'C', 'true');
+				
+				$this->Image('/web/theblock/sites/all/modules/sevenday/theorylogo-white.png', 10, 260, 11);
+				$this->Image('/web/theblock/sites/all/modules/sevenday/theorytype-white.png', 182, 261.5, 21);
+			}
+			function AcceptPageBreak() {
+				return false;
+			}
+		}
+	} else {
+		return;
+	}
+
+  $pdf = new PDF('P', 'mm', 'Letter');
+  $pdf->SetCreator('Theory Communication & Design');
+  $pdf->SetAuthor('Albert Martin (574-310-4391)');
+  $pdf->SetTitle('The BLOCK 7 Day Digest ' . date('m/d/Y', time() - 60 * 60 * 24 * 8) . ' to ' . date('m/d/Y', time() - 60 * 60 * 24));
+  $pdf->SetSubject('The BLOCK Performance Report');
+  $pdf->SetCompression(1);
+  $pdf->AddFont('Glyphish');
+  $pdf->AliasNbPages();
+  $pdf->AddPage();
+
+  $pdf->SetFillColor(241, 241, 241);
+  $pdf->Rect(10, 20, 195, 30, 'F');
+  $pdf->Image($site_logo, 15, 26, 75);
+  
+  // Header text for sections
+  $pdf->SetTextColor(171,171,171);
+  $pdf->SetDrawColor(241, 241, 241);
+  $pdf->SetLineWidth(1);
+  $pdf->SetFont('DroidSans', '', 20);
+  $pdf->Text(26,61,'User Actions');
+  $pdf->Line(69,59,204.5,59);
+  $pdf->Text(25.5,99,'Visitor Overview');
+  $pdf->Line(81,97,204.5,97);
+  $pdf->Text(26,162,'Social Overview');
+  $pdf->Line(79,160,204.5,160);
+  $pdf->Text(11,224,'Observations on This Period');
+  $pdf->Line(103,222,204.5,222);
+  
+  $pdf->SetFont('DroidSans', '', 9.5);
+  $pdf->Text(11,66,'This is just to show you what 85 letter characters looks like, this is all the space.');
+  $pdf->Text(11,104,'This is just to show you what 85 letter characters looks like, this is all the space.');
+  $pdf->Text(11,167,'This is just to show you what 85 letter characters looks like, this is all the space.');
+  
+  $pdf->SetTextColor(241, 241, 241);
+  $pdf->SetFont('Glyphish', '', 155);
+  $pdf->Text(160,262.5,'(');
+  
+  $pdf->SetFont('DroidSans', '', 10);
+  $pdf->SetTextColor(51, 51, 51);
+  $pdf->Text(11,232,'- This is just to show you what 120 letter characters looks like, this is all the space you have to compose your thoughts.');
+  $pdf->Text(11,239,'- This is just to show you what 120 letter characters looks like, this is all the space you have to compose your thoughts.');
+  $pdf->Text(11,246,'- This is just to show you what 120 letter characters looks like, this is all the space you have to compose your thoughts.');
+  $pdf->Text(11,253,'- This is just to show you what 120 letter characters looks like, this is all the space you have to compose your thoughts.');
+  
+  $pdf->SetFont('DroidSans', '', 30);
+  $pdf->SetTextColor(236, 175, 86);
+  $pdf->Text(35,80,'63');
+  $pdf->SetTextColor(113, 162, 97);
+  $pdf->Text(75,80,'19');
+  $pdf->SetTextColor(62, 109, 156);
+  $pdf->Text(115,80,'9');
+  $pdf->SetTextColor(129, 86, 138);
+  $pdf->Text(34,120,'1,604');
+  $pdf->SetTextColor(113, 162, 97);
+  $pdf->Text(95,120,'3,096');
+  $pdf->SetTextColor(62, 109, 156);
+  $pdf->Text(34,141,'2:48');
+  $pdf->Text(95,141,'42%');
+  $pdf->SetTextColor(59, 89, 146);
+  $pdf->Text(34,184,'802,270');
+  $pdf->Text(107,184,'975');
+  $pdf->SetTextColor(220, 54, 43);
+  $pdf->Text(34,206,'320');
+  $pdf->SetTextColor(89, 208, 237);
+  $pdf->Text(107,206,'36');
+  
+  $pdf->SetTextColor(51,51,51);
+  
+  $pdf->SetFont('DroidSans', '', 16);
+  $pdf->Text(165,44,'7 DAY DIGEST');
+  
+  $pdf->SetFont('DroidSans', 'B', 8);
+  $pdf->Text(35,84,'Registered');
+  $pdf->Text(75,84,'Total Posts');
+  $pdf->Text(115,84,'In the Forum');
+  $pdf->Text(34,124,'Articles Read');
+  $pdf->Text(95,124,'Total Visitors');
+  $pdf->Text(34,145,'Average Visit Length');
+  $pdf->Text(95,145,'Mobile Visitors');
+  $pdf->Text(34,188,'Page Impressions');
+  $pdf->Text(107,188,'Visits from Facebook');
+  $pdf->Text(34,210,'Search Impressions');
+  $pdf->Text(107,210,'Twitter Visits');
+  
+  $pdf->SetFont('Glyphish', '', 50);
+  
+  $pdf->SetTextColor(236, 175, 86);
+  $pdf->Text(14,82,'}');
+  $pdf->SetTextColor(113, 162, 97);
+  $pdf->Text(56,83,'d');
+  $pdf->SetTextColor(62, 109, 156);
+  $pdf->Text(95,82,'µ');
+  $pdf->SetTextColor(129, 86, 138);
+  $pdf->Text(14,122,'B');
+  $pdf->SetTextColor(113, 162, 97);
+  $pdf->Text(76,122,'L');
+  $pdf->SetTextColor(62, 109, 156);
+  $pdf->Text(14,143,'o');
+  $pdf->Text(76,144,'i');
+  $pdf->SetTextColor(59, 89, 146);
+  $pdf->Text(87, 186,'L');
+  
+  $pdf->AddFont('Zocial');
+  $pdf->SetFont('Zocial', '', 30);
+  
+  $pdf->SetTextColor(59, 89, 146);
+  $pdf->Text(19, 183,'f');
+  $pdf->SetTextColor(220, 54, 43);
+  $pdf->Text(21, 206,'G');
+  $pdf->SetTextColor(89, 208, 237);
+  $pdf->Text(90, 206,'T');
+  
+  // 7-day health meter.
+  $pdf->Image('https://chart.googleapis.com/chart?chf=bg,s,F0F0F0&chs=300x150&cht=gm&chco=333333,C64445|EBAE55|70A160&chd=t:80&chdlp=b&chma=|0,5#.png', 167, 23, 30);
+  $pdf->Image('https://chart.googleapis.com/chart?chf=bg,s,FFFFFF&chs=250x150&cht=gm&chco=333333,C64445|EBAE55|70A160&chd=t:90&chdlp=b&chma=|0,5#.png', 10, 53, 15);
+  $pdf->Image('https://chart.googleapis.com/chart?chf=bg,s,FFFFFF&chs=250x150&cht=gm&chco=333333,C64445|EBAE55|70A160&chd=t:60&chdlp=b&chma=|0,5#.png', 10, 91, 15);
+  $pdf->Image('https://chart.googleapis.com/chart?chf=bg,s,FFFFFF&chs=250x150&cht=gm&chco=333333,C64445|EBAE55|70A160&chd=t:90&chdlp=b&chma=|0,5#.png', 10, 154, 15);
+  
+  // Overview of registered users and posts.
+  $pdf->Image('https://chart.googleapis.com/chart?chxl=0:|Fr|Sa|Su|Mo|Tu|We|Th&chxr=0,-10,100&chxs=0,676767,12,0,lt,676767&chxt=x,y&chbh=a,7&chs=400x180&cht=bvs&chco=3E6D9C,71A261,ECAF56&chds=0,35,0,35,0,35&chd=t2:19,4,1,1,3,2,3|9,1,0,0,4,5,1|8,11,9,9,8,27,19&chdl=Forum+Posts|Other+Posts|Registrations&chdlp=b&chm=D,ECAF56,2,0,6,1#.png', 141, 62, 65);
+  
+  // Visitors by day of week.
+  $pdf->Image('http://chart.googleapis.com/chart?chxl=0:|Fr|Sa|Su|Mo|Tu|We|Th&chxr=0,-10,100&chxs=0,676767,12,0,lt,676767&chxt=x,y&chbh=a,7,9&chs=400x170&cht=bvg&chco=3E6D9C,71A261&chds=0,550,0,550&chd=t:256,219,211,294,336,165,123|465,462,440,511,537,355,326&chdl=Article+Reads|Total+Visits&chdlp=b&chma=|0,10#.png', 141, 103, 65);
+  
+  // Breakdown of visitors by time of day.
+  $pdf->Image('http://chart.googleapis.com/chart?chxl=0:|AM|1|2|3|4|5|6|7|8|9|10|11|PM|1|2|3|4|5|6|7|8|9|10|11&chxt=x,y&chbh=a,7,10&chs=400x120&cht=bvs&chco=3E6D9C&chds=0,255&chd=t:148,94,59,43,37,29,46,70,179,198,228,235,190,132,166,148,112,167,166,164,149,139,97,100&chdl=Visits+by+Hour&chdlp=b&chm=R,F1F0F0,0,0.335,0.795#.png', 141, 136, 65);
+  
+  // Print the Top Referrers section.
+  $pdf->SetFillColor(241, 241, 241);
+  $pdf->SetTextColor(51,51,51);
+  $pdf->SetFont('DroidSans', 'B', 8);
+  $pdf->SetXY(155,165);
+  $pdf->SetFillColor(51,51,51);
+  $pdf->SetTextColor(255,255,255);
+  $pdf->Cell(50,4,'Top 5 Referrers',0,2,'C','true');
+  $pdf->SetFillColor(241, 241, 241);
+  $pdf->SetTextColor(51,51,51);
+  $pdf->SetFont('DroidSans', '', 7);
+  $pdf->Cell(50,4,$referrers[0]['source'] . ' - ' . $referrers[0][visits],0,2,'C');
+  $pdf->Cell(50,4,$referrers[1]['source'] . ' - ' . $referrers[1][visits],0,2,'C','true');
+  $pdf->Cell(50,4,$referrers[2]['source'] . ' - ' . $referrers[2][visits],0,2,'C');
+  $pdf->Cell(50,4,$referrers[3]['source'] . ' - ' . $referrers[3][visits],0,2,'C','true');
+  $pdf->Cell(50,4,$referrers[4]['source'] . ' - ' . $referrers[4][visits],0,2,'C');
+  
+  // Print the Top Story section.
+  $pdf->Image('/web/theblock/sites/default/files/styles/600x250/public/articles/_BLOCK-ASSET-C7-Stingray-results.jpg', 155, 192, 50);
+  $pdf->SetXY(155,215);
+  $pdf->SetFont('DroidSans', 'B', 7);
+  $pdf->Cell(50,1,'Most Read Article - 379 reads',0,0,'C');
+	
+	$pdf->Output();
+	
+	return;
+}
+
+function _sevenday_get_top_referrers() {
+  $params = array(
+    'metrics' => array('ga:visits'),
+    'dimensions' => array('ga:source', 'ga:medium'),
+    'sort_metric' => array('-ga:visits'),
+    'filters' => 'ga:medium==referral',
+    'start_date' => strtotime('-8 days'),
+    'end_date' => strtotime('-1 day'),
+    'max_results' => 10,
+  );
+  $feed = google_analytics_api_report_data($params);
+  if ($feed->error) {
+    return FALSE;
+  }
+  return $feed->results->rows;
+}
