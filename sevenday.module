@@ -114,8 +114,8 @@ function sevenday_pdf() {
   $pdf->SetTextColor(113, 162, 97);
   $pdf->Text(95,120,_sevenday_get_total_visits());
   $pdf->SetTextColor(62, 109, 156);
-  $pdf->Text(34,141,'2:48');
-  $pdf->Text(95,141,'42%');
+  $pdf->Text(34,141,_sevenday_get_time_on_site());
+  $pdf->Text(95,141,_sevenday_get_percent_of_mobile() . '%');
   $pdf->SetTextColor(59, 89, 146);
   $pdf->Text(34,184,'802,270');
   $pdf->Text(107,184,'975');
@@ -235,6 +235,42 @@ function _sevenday_get_total_visits($start_date = -8, $end_date = -1, $articles_
   }
   
   return $feed->results->rows[0]['pageviews'];
+}
+
+function _sevenday_get_time_on_site() {
+  $params = array(
+    'metrics' => array('ga:avgTimeOnSite'),
+    'start_date' => strtotime('-8 days'),
+    'end_date' => strtotime('-1 day'),
+    'max_results' => 1,
+  );
+  
+  $feed = google_analytics_api_report_data($params);
+  
+  if ($feed->error) {
+    return FALSE;
+  }
+  
+  return date('i:s',$feed->results->rows[0]['avgTimeOnSite']);
+}
+
+function _sevenday_get_percent_of_mobile() {
+  $params = array(
+    'metrics' => array('ga:pageviews'),
+    'dimensions' => array('ga:isMobile'),
+    'start_date' => strtotime('-8 days'),
+    'end_date' => strtotime('-1 day'),
+    'max_results' => 1,
+    'filters' => 'ga:isMobile==Yes',
+  );
+  
+  $feed = google_analytics_api_report_data($params);
+  
+  if ($feed->error) {
+    return FALSE;
+  }
+  
+  return round(($feed->results->rows[0]['pageviews'] /  _sevenday_get_total_visits()) * 100);
 }
 
 function _sevenday_get_top_referrers() {
