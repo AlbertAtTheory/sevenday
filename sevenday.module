@@ -118,11 +118,11 @@ function sevenday_pdf() {
   $pdf->Text(95,141,_sevenday_get_percent_of_mobile() . '%');
   $pdf->SetTextColor(59, 89, 146);
   $pdf->Text(34,184,'802,270');
-  $pdf->Text(107,184,'975');
+  $pdf->Text(107,184,number_format(_sevenday_get_visits_by_social_network('Facebook')));
   $pdf->SetTextColor(220, 54, 43);
-  $pdf->Text(34,206,'320');
+  $pdf->Text(34,206,number_format( _sevenday_get_visits_by_search()));
   $pdf->SetTextColor(89, 208, 237);
-  $pdf->Text(107,206,'36');
+  $pdf->Text(107,206,number_format(_sevenday_get_visits_by_social_network('Twitter')));
   
   $pdf->SetTextColor(51,51,51);
   
@@ -139,9 +139,9 @@ function sevenday_pdf() {
   $pdf->Text(34,145,'Average Visit Length');
   $pdf->Text(95,145,'Mobile Visitors');
   $pdf->Text(34,188,'Page Impressions');
-  $pdf->Text(107,188,'Visits from Facebook');
+  $pdf->Text(107,188,'Pageviews from Facebook');
   $pdf->Text(34,210,'Search Impressions');
-  $pdf->Text(107,210,'Twitter Visits');
+  $pdf->Text(107,210,'Twitter Pageviews');
   
   $pdf->SetFont('Glyphish', '', 50);
   
@@ -370,6 +370,47 @@ function _sevenday_get_visits_by_hour() {
     'chart' => rtrim($chart_data,','),
     'biggest' => $biggest,
   );
+}
+
+function _sevenday_get_visits_by_social_network($filter) {
+  $params = array(
+    'metrics' => array('ga:pageviews'),
+    'dimensions' => array('ga:socialNetwork'),
+    'start_date' => strtotime('-8 days'),
+    'end_date' => strtotime('-1 day'),
+  );
+  
+  if ($filter) {
+    $params['filters'] = 'ga:socialNetwork==' . $filter;
+  }
+
+  $feed = google_analytics_api_report_data($params);
+  
+  if ($feed->error) {
+    return FALSE;
+  }
+  
+  if ($filter) {
+    return $feed->results->rows[0]['pageviews'];
+  } else {
+    return $feed->results->rows;
+  }
+}
+
+function _sevenday_get_visits_by_search() {
+  $params = array(
+    'metrics' => array('ga:organicSearches'),
+    'start_date' => strtotime('-8 days'),
+    'end_date' => strtotime('-1 day'),
+  );
+
+  $feed = google_analytics_api_report_data($params);
+  
+  if ($feed->error) {
+    return FALSE;
+  }
+  
+  return $feed->results->rows[0]['organicSearches'];
 }
 
 function _sevenday_visitor_overview() {
