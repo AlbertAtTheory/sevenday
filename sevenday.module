@@ -126,8 +126,9 @@ function sevenday_pdf() {
   
   $pdf->SetTextColor(51,51,51);
   
+  $pdf->Image('https://chart.googleapis.com/chart?chxl=1:|Under|Over&chdl=Performance&chl=+&chxt=x,y&chf=bg,s,F0F0F0&chs=300x150&cht=gm&chco=333333,C64445|EBAE55|70A160&chd=t:80&chdlp=b&chma=|0,5#.png', 161, 22, 43);
   $pdf->SetFont('DroidSans', '', 16);
-  $pdf->Text(165,44,'7 DAY DIGEST');
+  $pdf->Text(128,37,'7 DAY DIGEST');
   
   $pdf->SetFont('DroidSans', 'B', 8);
   $pdf->Text(35,84,'Registered');
@@ -171,7 +172,6 @@ function sevenday_pdf() {
   $pdf->Text(90, 206,'T');
   
   // 7-day health meter.
-  $pdf->Image('https://chart.googleapis.com/chart?chf=bg,s,F0F0F0&chs=300x150&cht=gm&chco=333333,C64445|EBAE55|70A160&chd=t:80&chdlp=b&chma=|0,5#.png', 167, 23, 30);
   $pdf->Image('https://chart.googleapis.com/chart?chf=bg,s,FFFFFF&chs=250x150&cht=gm&chco=333333,C64445|EBAE55|70A160&chd=t:90&chdlp=b&chma=|0,5#.png', 10, 53, 15);
   $pdf->Image('https://chart.googleapis.com/chart?chf=bg,s,FFFFFF&chs=250x150&cht=gm&chco=333333,C64445|EBAE55|70A160&chd=t:' . _sevenday_visitor_overview() . '&chdlp=b&chma=|0,5#.png', 10, 91, 15);
   $pdf->Image('https://chart.googleapis.com/chart?chf=bg,s,FFFFFF&chs=250x150&cht=gm&chco=333333,C64445|EBAE55|70A160&chd=t:90&chdlp=b&chma=|0,5#.png', 10, 154, 15);
