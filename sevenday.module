@@ -110,9 +110,9 @@ function sevenday_pdf() {
   $pdf->SetTextColor(62, 109, 156);
   $pdf->Text(115,80,'9');
   $pdf->SetTextColor(129, 86, 138);
-  $pdf->Text(34,120,_sevenday_get_total_visits(-8, -1, TRUE));
+  $pdf->Text(34,120,number_format(_sevenday_get_total_visits(-8, -1, TRUE)));
   $pdf->SetTextColor(113, 162, 97);
-  $pdf->Text(95,120,_sevenday_get_total_visits());
+  $pdf->Text(95,120,number_format(_sevenday_get_total_visits()));
   $pdf->SetTextColor(62, 109, 156);
   $pdf->Text(34,141,_sevenday_get_time_on_site());
   $pdf->Text(95,141,_sevenday_get_percent_of_mobile() . '%');
