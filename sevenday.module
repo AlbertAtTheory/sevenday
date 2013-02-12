@@ -117,7 +117,7 @@ function sevenday_pdf() {
   $pdf->Text(34,141,_sevenday_get_time_on_site());
   $pdf->Text(95,141,_sevenday_get_percent_of_mobile() . '%');
   $pdf->SetTextColor(59, 89, 146);
-  $pdf->Text(34,184,'802,270');
+  $pdf->Text(34,184,number_format(_sevenday_get_page_impressions()));
   $pdf->Text(107,184,number_format(_sevenday_get_visits_by_social_network('Facebook')));
   $pdf->SetTextColor(220, 54, 43);
   $pdf->Text(34,206,number_format( _sevenday_get_visits_by_search()));
@@ -411,6 +411,47 @@ function _sevenday_get_visits_by_search() {
   }
   
   return $feed->results->rows[0]['organicSearches'];
+}
+
+function _sevenday_get_page_impressions() {
+  $app_id = "567795176566601";
+  $app_secret = "09c10fad18346926543004018eb3be7f";
+  $my_url = "https://theblock.com/admin/reports/sevenday.pdf";
+  
+  session_start();
+  
+  $code = $_REQUEST["code"];
+  
+  if(empty($code)) {
+    $_SESSION['state'] = md5(uniqid(rand(), TRUE)); // CSRF protection
+    $dialog_url = "https://www.facebook.com/dialog/oauth?client_id=" 
+      . $app_id . "&redirect_uri=" . urlencode($my_url) . "&state="
+      . $_SESSION['state'] . "&scope=read_insights";
+    
+    echo("<script> top.location.href='" . $dialog_url . "'</script>");
+  }
+  
+  if($_SESSION['state'] && ($_SESSION['state'] === $_REQUEST['state'])) {
+    $token_url = "https://graph.facebook.com/oauth/access_token?"
+      . "client_id=" . $app_id . "&redirect_uri=" . urlencode($my_url)
+      . "&client_secret=" . $app_secret . "&code=" . $code;
+    
+    $response = file_get_contents($token_url);
+    $params = null;
+    parse_str($response, $params);
+    
+    $_SESSION['access_token'] = $params['access_token'];
+    
+    $graph_url = "https://graph.facebook.com/130638851883/insights/page_posts_impressions/week?access_token=" 
+      . $params['access_token'];
+    
+    $reqdata = json_decode(file_get_contents($graph_url));
+    
+    return $reqdata->data[0]->values[2]->value;
+   }
+   else {
+      return "ERR";
+   }
 }
 
 function _sevenday_visitor_overview() {
