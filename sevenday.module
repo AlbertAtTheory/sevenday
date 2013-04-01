@@ -60,7 +60,7 @@ function _sevenday_generate_chart_url($type) {
   
   switch ($type) {
     case 'user':
-      $charturl .= 'chxl=0:|Mo|Tu|We|Th|Fr|Sa|Su&chxr=0,-10,100|1,0,10|2,0,20&chxs=0,676767,12,0,lt,676767&chxt=x,y,r&chbh=a,7&chs=400x180&cht=bvs&chco=3E6D9C,71A261,ECAF56&chds=0,10,0,10,0,20&chd=t2:2,2,6,1,2,2,1|1,1,0,3,2,0,0|5,9,13,12,10,11,8&chdl=Forum+Posts|Other+Posts|Registrations&chdlp=b&chm=D,ECAF56,2,0,6,1';
+      $charturl .= 'chxl=0:|Mo|Tu|We|Th|Fr|Sa|Su&chxr=0,-10,100|1,0,' . _sevenday_get_new_posts_by_day()['biggest'] . '|2,0,' . _sevenday_get_new_members_by_day()['biggest'] . '&chxs=0,676767,12,0,lt,676767&chxt=x,y,r&chbh=a,7&chs=400x180&cht=bvs&chco=3E6D9C,71A261,ECAF56&chds=0,' . _sevenday_get_new_posts_by_day()['biggest'] . ',0,' . _sevenday_get_new_posts_by_day()['biggest'] . ',0,' . _sevenday_get_new_members_by_day()['biggest'] . '&chd=t2:' . _sevenday_get_new_posts_by_day()['forum_chart'] . '|' . _sevenday_get_new_posts_by_day()['other_chart'] . '|' . _sevenday_get_new_members_by_day()['chart'] . '&chdl=Forum+Posts|Other+Posts|Registrations&chdlp=b&chm=D,ECAF56,2,0,6,1';
       break;
     case 'daily':
       $charturl .= 'chxl=0:|Mo|Tu|We|Th|Fr|Sa|Su&chxr=0,-10,100&chxs=0,676767,12,0,lt,676767&chxt=x,y&chbh=a,7,9&chs=400x170&cht=bvg&chco=3E6D9C,71A261&chds=0,' . _sevenday_get_visits_by_day()['biggest'] . ',0,' . _sevenday_get_visits_by_day()['biggest'] . '&chxr=0,-10,100|1,0,' . _sevenday_get_visits_by_day()['biggest'] . '&chd=t:' . _sevenday_get_visits_by_day(TRUE)['chart'] . '|' . _sevenday_get_visits_by_day()['chart'] . '&chdl=Article+Reads|Total+Impressions&chdlp=b&chma=|0,10';
