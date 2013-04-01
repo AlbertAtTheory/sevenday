@@ -407,7 +407,7 @@ function _sevenday_get_page_impressions() {
 }
 
 function _sevenday_user_overview() {
-  return (68/77)*50;
+  return (_sevenday_get_new_members()/_sevenday_get_new_members(-15, -8))*100;
 }
 
 function _sevenday_visitor_overview() {
