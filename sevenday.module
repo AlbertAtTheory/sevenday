@@ -19,13 +19,14 @@ function sevenday_menu() {
 }
 
 function sevenday_pdf() {
-  global $user;
-  $site_name = variable_get('site_name');
-
   if (!($path = libraries_get_path('fpdf'))) {
     return;
   } else {
+    global $user;
+    $site_name = variable_get('site_name');
+
     define('FPDF_FONTPATH', drupal_get_path('module', 'sevenday') . '/fonts');
+
     require($path . '/fpdf.php');
 		require('sevenday.fpdf.inc');
 		
