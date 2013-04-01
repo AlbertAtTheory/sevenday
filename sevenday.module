@@ -37,7 +37,7 @@ function sevenday_pdf() {
 		$pdf->AddPage();
 		$pdf->PrintSectionHeaders();
 		$pdf->PrintHealthMeters(_sevenday_user_overview(), _sevenday_visitor_overview(), _sevenday_social_overview());
-		$pdf->PrintUserActions(_sevenday_get_new_members(), _sevenday_get_new_posts(), 16, _sevenday_generate_chart_url('user'));
+		$pdf->PrintUserActions(_sevenday_get_new_members(), _sevenday_get_new_posts(), _sevenday_get_new_posts('forum'), _sevenday_generate_chart_url('user'));
 		$pdf->PrintVisitorOverview(_sevenday_get_total_visits(-8, -1, TRUE), _sevenday_get_total_visits(), _sevenday_get_time_on_site(), _sevenday_get_percent_of_mobile(), _sevenday_generate_chart_url('daily'), _sevenday_generate_chart_url('hourly'));
 		$pdf->PrintSocialOverview(_sevenday_get_page_impressions(), _sevenday_get_visits_by_social_network('Facebook'), _sevenday_get_visits_by_search(), _sevenday_get_visits_by_social_network('Twitter'));
 		$pdf->PrintTopReferrers(array(
@@ -84,11 +84,16 @@ function _sevenday_get_new_members($start_date = -8, $end_date = -1) {
   return $return->rowCount();
 }
 
-function _sevenday_get_new_posts($start_date = -8, $end_date = -1) {
+function _sevenday_get_new_posts($type = FALSE, $start_date = -8, $end_date = -1) {
   $query = db_select('node', 'n');
   $query->fields('n', array('title', 'created'))
     ->condition('n.created', strtotime($end_date . ' day'), '<=')
     ->condition('n.created', strtotime($start_date . ' days'), '>=');
+
+  if ($type) {
+    $query->condition('n.type', $type);
+  }
+
   $return = $query->execute();
   
   return $return->rowCount();
