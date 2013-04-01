@@ -60,13 +60,17 @@ function _sevenday_generate_chart_url($type) {
   
   switch ($type) {
     case 'user':
-      $charturl .= 'chxl=0:|Mo|Tu|We|Th|Fr|Sa|Su&chxr=0,-10,100|1,0,' . _sevenday_get_new_posts_by_day()['biggest'] . '|2,0,' . _sevenday_get_new_members_by_day()['biggest'] . '&chxs=0,676767,12,0,lt,676767&chxt=x,y,r&chbh=a,7&chs=400x180&cht=bvs&chco=3E6D9C,71A261,ECAF56&chds=0,' . _sevenday_get_new_posts_by_day()['biggest'] . ',0,' . _sevenday_get_new_posts_by_day()['biggest'] . ',0,' . _sevenday_get_new_members_by_day()['biggest'] . '&chd=t2:' . _sevenday_get_new_posts_by_day()['forum_chart'] . '|' . _sevenday_get_new_posts_by_day()['other_chart'] . '|' . _sevenday_get_new_members_by_day()['chart'] . '&chdl=Forum+Posts|Other+Posts|Registrations&chdlp=b&chm=D,ECAF56,2,0,6,1';
+      $dailymembers = _sevenday_get_new_members_by_day();
+      $dailyposts = _sevenday_get_new_posts_by_day();
+      $charturl .= 'chxl=0:|Mo|Tu|We|Th|Fr|Sa|Su&chxr=0,-10,100|1,0,' . $dailyposts['biggest'] . '|2,0,' . $dailymembers['biggest'] . '&chxs=0,676767,12,0,lt,676767&chxt=x,y,r&chbh=a,7&chs=400x180&cht=bvs&chco=3E6D9C,71A261,ECAF56&chds=0,' . $dailyposts['biggest'] . ',0,' . $dailyposts['biggest'] . ',0,' . $dailymembers['biggest'] . '&chd=t2:' . $dailyposts['forum_chart'] . '|' . $dailyposts['other_chart'] . '|' . $dailymembers['chart'] . '&chdl=Forum+Posts|Other+Posts|Registrations&chdlp=b&chm=D,ECAF56,2,0,6,1';
       break;
     case 'daily':
-      $charturl .= 'chxl=0:|Mo|Tu|We|Th|Fr|Sa|Su&chxr=0,-10,100&chxs=0,676767,12,0,lt,676767&chxt=x,y&chbh=a,7,9&chs=400x170&cht=bvg&chco=3E6D9C,71A261&chds=0,' . _sevenday_get_visits_by_day()['biggest'] . ',0,' . _sevenday_get_visits_by_day()['biggest'] . '&chxr=0,-10,100|1,0,' . _sevenday_get_visits_by_day()['biggest'] . '&chd=t:' . _sevenday_get_visits_by_day(TRUE)['chart'] . '|' . _sevenday_get_visits_by_day()['chart'] . '&chdl=Article+Reads|Total+Impressions&chdlp=b&chma=|0,10';
+      $dailyvisits = _sevenday_get_visits_by_day();
+      $charturl .= 'chxl=0:|Mo|Tu|We|Th|Fr|Sa|Su&chxr=0,-10,100&chxs=0,676767,12,0,lt,676767&chxt=x,y&chbh=a,7,9&chs=400x170&cht=bvg&chco=3E6D9C,71A261&chds=0,' . $dailyvisits['biggest'] . ',0,' . $dailyvisits['biggest'] . '&chxr=0,-10,100|1,0,' . $dailyvisits['biggest'] . '&chd=t:' . _sevenday_get_visits_by_day(TRUE)['chart'] . '|' . $dailyvisits['chart'] . '&chdl=Article+Reads|Total+Impressions&chdlp=b&chma=|0,10';
       break;
     case 'hourly':
-      $charturl .= 'chxl=0:|AM|1|2|3|4|5|6|7|8|9|10|11|PM|1|2|3|4|5|6|7|8|9|10|11&chxt=x,y&chbh=a,7,10&chs=400x120&cht=bvs&chco=3E6D9C&chds=0,' . _sevenday_get_visits_by_hour()['biggest'] . '&chd=t:' . _sevenday_get_visits_by_hour()['chart'] . '&chxr=0,-10,100|1,0,' . _sevenday_get_visits_by_hour()['biggest'] . '&chdl=Visits+by+Hour&chdlp=b&chm=R,F1F0F0,0,0.335,0.795';
+      $hourlyvisits = _sevenday_get_visits_by_hour();
+      $charturl .= 'chxl=0:|AM|1|2|3|4|5|6|7|8|9|10|11|PM|1|2|3|4|5|6|7|8|9|10|11&chxt=x,y&chbh=a,7,10&chs=400x120&cht=bvs&chco=3E6D9C&chds=0,' . $hourlyvisits['biggest'] . '&chd=t:' . $hourlyvisits['chart'] . '&chxr=0,-10,100|1,0,' . $hourlyvisits['biggest'] . '&chdl=Visits+by+Hour&chdlp=b&chm=R,F1F0F0,0,0.335,0.795';
       break;
   }
   
