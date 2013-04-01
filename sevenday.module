@@ -1,7 +1,7 @@
 <?php
 function sevenday_permission() {
 	return array(
-		'access seven day' => array(
+		'access printout' => array(
 			'title' => t('Access Seven Day Report'),
 			'description' => t('Allow users to view seven day report PDF'),
 		),
