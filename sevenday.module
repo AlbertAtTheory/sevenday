@@ -84,6 +84,27 @@ function _sevenday_get_new_members($start_date = -8, $end_date = -1) {
   return $return->rowCount();
 }
 
+function _sevenday_get_new_members_by_day() {
+  for ($i = -7; $i <= -1; $i++) {
+    $query = db_select('users', 'u');
+    $query->fields('u', array('name', 'created'))
+      ->condition('u.created', strtotime($i . ' days')+86400, '<=')
+      ->condition('u.created', strtotime($i . ' days'), '>=');
+    $return = $query->execute();
+    
+    $chart_data .= $return->rowCount() . ',';
+    
+    if ($biggest <= $return->rowCount()) {
+      $biggest = $return->rowCount();
+    }
+  }
+  
+  return array(
+    'chart' => rtrim($chart_data,','),
+    'biggest' => $biggest,
+  );
+}
+
 function _sevenday_get_new_posts($type = FALSE, $start_date = -8, $end_date = -1) {
   $query = db_select('node', 'n');
   $query->fields('n', array('title', 'created'))
@@ -97,6 +118,38 @@ function _sevenday_get_new_posts($type = FALSE, $start_date = -8, $end_date = -1
   $return = $query->execute();
   
   return $return->rowCount();
+}
+
+function _sevenday_get_new_posts_by_day() {
+  for ($i = -7; $i <= -1; $i++) {
+    $other_query = db_select('node', 'n');
+    $other_query->fields('n', array('title', 'created'))
+      ->condition('n.created', strtotime($i . ' days')+86400, '<=')
+      ->condition('n.created', strtotime($i . ' days'), '>=');
+      
+    $other_return = $other_query->execute();
+  
+    $forum_query = db_select('node', 'n');
+    $forum_query->fields('n', array('title', 'created'))
+      ->condition('n.created', strtotime($i . ' days')+86400, '<=')
+      ->condition('n.created', strtotime($i . ' days'), '>=')
+      ->condition('n.type', 'forum');
+    
+    $forum_return = $forum_query->execute();
+    
+    $other_chart_data .= $other_return->rowCount()-$forum_return->rowCount() . ',';
+    $forum_chart_data .= $forum_return->rowCount() . ',';
+    
+    if ($biggest <= $other_return->rowCount()) {
+      $biggest = $other_return->rowCount();
+    }
+  }
+  
+  return array(
+    'forum_chart' => rtrim($forum_chart_data,','),
+    'other_chart' => rtrim($other_chart_data,','),
+    'biggest' => $biggest,
+  );
 }
 
 function _sevenday_get_total_visits($start_date = -8, $end_date = -1, $articles_only = FALSE) {
