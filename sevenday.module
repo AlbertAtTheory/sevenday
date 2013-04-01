@@ -21,23 +21,34 @@ function sevenday_menu() {
 function sevenday_pdf() {
   global $user;
   $site_name = variable_get('site_name');
-  $site_logo = '/web/theblock/sites/all/themes/theblock/logo-print.png'; 
-  
-  $referrers = _sevenday_get_top_referrers();
 
-	if ($path = libraries_get_path('fpdf')) {
+  if (!($path = libraries_get_path('fpdf'))) {
+    return;
+  } else {
     define('FPDF_FONTPATH', drupal_get_path('module', 'sevenday') . '/fonts');
     require($path . '/fpdf.php');
 		
     class PDF extends FPDF {
       function Header() {
+        $this->AddFont('Glyphish');
+        $this->AddFont('Zocial');
         $this->AddFont('DroidSans');
         $this->AddFont('DroidSans', 'B');
         $this->SetFont('DroidSans', 'B', 10);
 				
 				$this->SetFillColor(51,51,51);
 				$this->SetTextColor(210,210,210);
-				$this->Cell(195, 10, variable_get('site_name') . ' Performance Summary ' . date('m/d/Y', time() - 60 * 60 * 24 * 8) . ' to ' . date('m/d/Y', time() - 60 * 60 * 24), 0, 2, 'C', 'true');
+				$this->Cell(195, 10, variable_get('site_name') . ' Performance Summary ' . date('m/d/Y', time() - 60 * 60 * 24 * 7) . ' to ' . date('m/d/Y', time() - 60 * 60 * 24), 0, 2, 'C', 'true');
+				
+				$this->SetCreator('Theory Communication & Design');
+        $this->SetAuthor('Albert Martin (574-310-4391)');
+        $this->SetTitle('The BLOCK 7 Day Digest ' . date('m/d/Y', time() - 60 * 60 * 24 * 8) . ' to ' . date('m/d/Y', time() - 60 * 60 * 24));
+        $this->SetSubject('The BLOCK Performance Report');
+        $this->SetCompression(1);
+        
+        $this->SetFillColor(241, 241, 241);
+        $this->Rect(10, 20, 195, 30, 'F');
+        $this->Image('/web/theblock/sites/all/themes/theblock/logo-print.png', 15, 26, 75);
 			}
 			function Footer() {
 				$this->SetFont('DroidSans', '', 8);
@@ -50,170 +61,217 @@ function sevenday_pdf() {
 				$this->Image('/web/theblock/sites/all/modules/sevenday/theorylogo-white.png', 10, 260, 11);
 				$this->Image('/web/theblock/sites/all/modules/sevenday/theorytype-white.png', 182, 261.5, 21);
 			}
+			function SetupHeaderPrinting() {
+  			$this->SetTextColor(171,171,171);
+        $this->SetDrawColor(241, 241, 241);
+        $this->SetLineWidth(1);
+        $this->SetFont('DroidSans', '', 20);
+			}
+      function PrintIcons($section) {
+        $this->SetFont('Glyphish', '', 50);
+
+        switch ($section) {
+          case 0:
+            $this->SetTextColor(236, 175, 86);
+            $this->Text(14,82,'}');
+            $this->SetTextColor(113, 162, 97);
+            $this->Text(56,83,'d');
+            $this->SetTextColor(62, 109, 156);
+            $this->Text(95,82,'µ');
+            break;
+          case 1:
+            $this->SetTextColor(129, 86, 138);
+            $this->Text(14,122,'B');
+            $this->SetTextColor(113, 162, 97);
+            $this->Text(76,122,'L');
+            $this->SetTextColor(62, 109, 156);
+            $this->Text(14,143,'o');
+            $this->Text(76,144,'i');
+            break;
+          case 2:
+            $this->SetTextColor(59, 89, 146);
+            $this->Text(87, 186,'L');
+            $this->SetFont('Zocial', '', 30);
+            $this->SetTextColor(59, 89, 146);
+            $this->Text(19, 183,'f');
+            $this->SetTextColor(220, 54, 43);
+            $this->Text(21, 206,'G');
+            $this->SetTextColor(89, 208, 237);
+            $this->Text(90, 206,'T');
+            break;
+        }
+			}
+      function PrintHealthMeters($userscore, $visitorscore, $socialscore) {
+        $avg = (($userscore + $visitorscore + $socialscore) / 3);
+        $this->Image('https://chart.googleapis.com/chart?chxl=1:|Under|Over&chdl=Performance&chl=+&chxt=x,y&chf=bg,s,F0F0F0&chs=300x150&cht=gm&chco=333333,C64445|EBAE55|70A160&chd=t:' . $avg . '&chdlp=b&chma=|0,5#.png', 161, 22, 43);
+        $this->Image('https://chart.googleapis.com/chart?chf=bg,s,FFFFFF&chs=250x150&cht=gm&chco=333333,C64445|EBAE55|70A160&chd=t:' . $userscore . '&chdlp=b&chma=|0,5#.png', 10, 53, 15);
+        $this->Image('https://chart.googleapis.com/chart?chf=bg,s,FFFFFF&chs=250x150&cht=gm&chco=333333,C64445|EBAE55|70A160&chd=t:' . $visitorscore . '&chdlp=b&chma=|0,5#.png', 10, 91, 15);
+        $this->Image('https://chart.googleapis.com/chart?chf=bg,s,FFFFFF&chs=250x150&cht=gm&chco=333333,C64445|EBAE55|70A160&chd=t:' . $socialscore . '&chdlp=b&chma=|0,5#.png', 10, 154, 15);
+    
+  			$this->SetFont('DroidSans', '', 16);
+        $this->SetTextColor(171,171,171);
+        $this->Text(128,37,'7 DAY DIGEST');
+			}
+			function PrintSectionHeaders() {
+  			$this->SetupHeaderPrinting();
+    		$this->Text(26,61,'User Actions');
+        $this->Line(69,59,204.5,59);
+        $this->Text(25.5,99,'Visitor Overview');
+        $this->Line(81,97,204.5,97);
+        $this->Text(26,162,'Social Overview');
+        $this->Line(79,160,204.5,160);
+        $this->Text(11,224,'Observations on This Period');
+        $this->Line(103,222,204.5,222);
+			}
+      function PrintUserActions($registered, $posts, $forum, $charturl) {
+        $this->PrintIcons(0);
+  			$this->SetFont('DroidSans', '', 30);
+  			$this->SetTextColor(236, 175, 86);
+  			$this->Text(35, 80, $registered);
+  			$this->SetTextColor(113, 162, 97);
+        $this->Text(75, 80, $posts);
+        $this->SetTextColor(62, 109, 156);
+        $this->Text(115, 80, $forum);
+
+        $this->SetFont('DroidSans', 'B', 8);
+        $this->SetTextColor(51,51,51);
+        $this->Text(35,84,'New Registered');
+        $this->Text(75,84,'New Posts');
+        $this->Text(115,84,'In the Forum');
+
+        $this->Image($charturl, 141, 62, 65);
+      }
+      function PrintVisitorOverview($articles, $impressions, $visitlength, $mobile, $dailycharturl, $hourlycharturl) {
+        $this->PrintIcons(1);        
+  			$this->SetFont('DroidSans', '', 30);
+        $this->SetTextColor(129, 86, 138);
+        $this->Text(34,120,number_format($articles));
+        $this->SetTextColor(113, 162, 97);
+        $this->Text(95,120,number_format($impressions));
+        $this->SetTextColor(62, 109, 156);
+        $this->Text(34,141,$visitlength);
+        $this->Text(95,141,$mobile . '%');
+
+        $this->SetFont('DroidSans', 'B', 8);
+        $this->SetTextColor(51,51,51);
+        $this->Text(34,124,'Articles Read');
+        $this->Text(95,124,'Total Impressions');
+        $this->Text(34,145,'Average Visit Length');
+        $this->Text(95,145,'Mobile Visitors');
+
+        $this->Image($dailycharturl, 141, 103, 65);
+        $this->Image($hourlycharturl, 141, 136, 65);
+			}
+      function PrintSocialOverview($facebookimpressions, $facebookpageviews, $searchimpressions, $twitterpageviews) {
+        $this->PrintIcons(2); 
+        $this->SetFont('DroidSans', '', 30);
+        $this->SetTextColor(59, 89, 146);
+        $this->Text(34,184,number_format($facebookimpressions));
+        $this->Text(107,184,number_format($facebookpageviews));
+        $this->SetTextColor(220, 54, 43);
+        $this->Text(34,206,number_format($searchimpressions));
+        $this->SetTextColor(89, 208, 237);
+        $this->Text(107,206,number_format($twitterpageviews));
+
+        $this->SetFont('DroidSans', 'B', 8);
+        $this->SetTextColor(51,51,51);
+        $this->Text(34,188,'Post Impressions');
+        $this->Text(107,188,'Pageviews from Facebook');
+        $this->Text(34,210,'Search Impressions');
+        $this->Text(107,210,'Twitter Pageviews');
+			}
+			function PrintTopReferrers($referrers) {
+  			$this->SetFillColor(241, 241, 241);
+        $this->SetTextColor(51,51,51);
+        $this->SetFont('DroidSans', 'B', 8);
+        $this->SetXY(155,165);
+        $this->SetFillColor(51,51,51);
+        $this->SetTextColor(255,255,255);
+        $this->Cell(50,4,'Top 5 Referrers - Pageviews',0,2,'C','true');
+        $this->SetFillColor(241, 241, 241);
+        $this->SetTextColor(51,51,51);
+        $this->SetFont('DroidSans', '', 7);
+        $this->Cell(50,4,$referrers[0],0,2,'C');
+        $this->Cell(50,4,$referrers[1],0,2,'C','true');
+        $this->Cell(50,4,$referrers[2],0,2,'C');
+        $this->Cell(50,4,$referrers[3],0,2,'C','true');
+        $this->Cell(50,4,$referrers[4],0,2,'C');
+			}
+			function PrintTopStory($topstory) {
+  			// Print the Top Story section.
+        $article_path = drupal_get_normal_path(ltrim($topstory['pagePath'],'/'));
+        $article = menu_get_object('node', 1, $article_path);
+        
+        $this->Image(image_style_path('600x250', $article->field_image['und'][0]['uri']), 155, 192, 50);
+        $this->SetXY(155,215);
+        $this->SetFont('DroidSans', 'B', 7);
+        $this->Cell(50,1,'Most Read Article - ' . number_format($topstory['pageviews']) . ' reads',0,0,'C');
+			}
+      function PrintObservations() {
+        $this->SetTextColor(241, 241, 241);
+        $this->SetFont('Glyphish', '', 155);
+        $this->Text(160,262.5,'(');
+
+        $this->SetFont('DroidSans', '', 9.5);
+        $this->SetTextColor(171,171,171);
+        $this->Text(11,66,'Large amount of new signups from FUEL and NASCAR story repurposing.');
+        $this->Text(11,104,'Large amount of article reads thanks to heavy linking in FUEL #1.');
+        $this->Text(11,167,'Two weeks after deployment, FUEL #1 the highest referring source!');
+
+        $this->SetFont('DroidSans', '', 10);
+        $this->SetTextColor(51, 51, 51);
+        $this->Text(11,232,'- The integration in FUEL #1 was a huge success and led to a large amount of traffic and our most-read article.');
+        $this->Text(11,239,'- NASCAR repurposed Buz McKim interview which brought in a large amount of new visitors and site exposure.');
+        $this->Text(11,246,'- Continuing to see an increase in visitors from organic Google, Bing and Yahoo search results.');
+        $this->Text(11,253,'- 22 visitors sent to ChevroletPerformance.com; 9 visited the COPO Signup form.');
+			}
 			function AcceptPageBreak() {
 				return false;
 			}
 		}
-	} else {
-		return;
+		
+		$referrers = _sevenday_get_top_referrers();
+		
+		$pdf = new PDF('P', 'mm', 'Letter');
+		$pdf->AliasNbPages();
+		$pdf->AddPage();
+		$pdf->PrintSectionHeaders();
+		$pdf->PrintHealthMeters(_sevenday_user_overview(), _sevenday_visitor_overview(), _sevenday_social_overview());
+		$pdf->PrintUserActions(68, 23, 16, _sevenday_generate_chart_url('user'));
+		$pdf->PrintVisitorOverview(_sevenday_get_total_visits(-8, -1, TRUE), _sevenday_get_total_visits(), _sevenday_get_time_on_site(), _sevenday_get_percent_of_mobile(), _sevenday_generate_chart_url('daily'), _sevenday_generate_chart_url('hourly'));
+		$pdf->PrintSocialOverview(_sevenday_get_page_impressions(), _sevenday_get_visits_by_social_network('Facebook'), _sevenday_get_visits_by_search(), _sevenday_get_visits_by_social_network('Twitter'));
+		$pdf->PrintTopReferrers(array(
+		    $referrers[0]['source'] . ' - ' . number_format($referrers[0]['pageviews']),
+		    $referrers[1]['source'] . ' - ' . number_format($referrers[1]['pageviews']),
+		    $referrers[2]['source'] . ' - ' . number_format($referrers[2]['pageviews']),
+		    $referrers[3]['source'] . ' - ' . number_format($referrers[3]['pageviews']),
+		    $referrers[4]['source'] . ' - ' . number_format($referrers[4]['pageviews']),
+		  ));
+		$pdf->PrintTopStory(_sevenday_get_top_article()[0]);
+		$pdf->PrintObservations();
+  	$pdf->Output();
+  	
+  	return;
 	}
+}
 
-  $pdf = new PDF('P', 'mm', 'Letter');
-  $pdf->SetCreator('Theory Communication & Design');
-  $pdf->SetAuthor('Albert Martin (574-310-4391)');
-  $pdf->SetTitle('The BLOCK 7 Day Digest ' . date('m/d/Y', time() - 60 * 60 * 24 * 8) . ' to ' . date('m/d/Y', time() - 60 * 60 * 24));
-  $pdf->SetSubject('The BLOCK Performance Report');
-  $pdf->SetCompression(1);
-  $pdf->AddFont('Glyphish');
-  $pdf->AliasNbPages();
-  $pdf->AddPage();
-
-  $pdf->SetFillColor(241, 241, 241);
-  $pdf->Rect(10, 20, 195, 30, 'F');
-  $pdf->Image($site_logo, 15, 26, 75);
+function _sevenday_generate_chart_url($type) {
+  $charturl = 'https://chart.googleapis.com/chart?';
   
-  // Header text for sections
-  $pdf->SetTextColor(171,171,171);
-  $pdf->SetDrawColor(241, 241, 241);
-  $pdf->SetLineWidth(1);
-  $pdf->SetFont('DroidSans', '', 20);
-  $pdf->Text(26,61,'User Actions');
-  $pdf->Line(69,59,204.5,59);
-  $pdf->Text(25.5,99,'Visitor Overview');
-  $pdf->Line(81,97,204.5,97);
-  $pdf->Text(26,162,'Social Overview');
-  $pdf->Line(79,160,204.5,160);
-  $pdf->Text(11,224,'Observations on This Period');
-  $pdf->Line(103,222,204.5,222);
+  switch ($type) {
+    case 'user':
+      $charturl .= 'chxl=0:|Mo|Tu|We|Th|Fr|Sa|Su&chxr=0,-10,100|1,0,10|2,0,20&chxs=0,676767,12,0,lt,676767&chxt=x,y,r&chbh=a,7&chs=400x180&cht=bvs&chco=3E6D9C,71A261,ECAF56&chds=0,10,0,10,0,20&chd=t2:2,2,6,1,2,2,1|1,1,0,3,2,0,0|5,9,13,12,10,11,8&chdl=Forum+Posts|Other+Posts|Registrations&chdlp=b&chm=D,ECAF56,2,0,6,1';
+      break;
+    case 'daily':
+      $charturl .= 'chxl=0:|Mo|Tu|We|Th|Fr|Sa|Su&chxr=0,-10,100&chxs=0,676767,12,0,lt,676767&chxt=x,y&chbh=a,7,9&chs=400x170&cht=bvg&chco=3E6D9C,71A261&chds=0,' . _sevenday_get_visits_by_day()['biggest'] . ',0,' . _sevenday_get_visits_by_day()['biggest'] . '&chxr=0,-10,100|1,0,' . _sevenday_get_visits_by_day()['biggest'] . '&chd=t:' . _sevenday_get_visits_by_day(TRUE)['chart'] . '|' . _sevenday_get_visits_by_day()['chart'] . '&chdl=Article+Reads|Total+Impressions&chdlp=b&chma=|0,10';
+      break;
+    case 'hourly':
+      $charturl .= 'chxl=0:|AM|1|2|3|4|5|6|7|8|9|10|11|PM|1|2|3|4|5|6|7|8|9|10|11&chxt=x,y&chbh=a,7,10&chs=400x120&cht=bvs&chco=3E6D9C&chds=0,' . _sevenday_get_visits_by_hour()['biggest'] . '&chd=t:' . _sevenday_get_visits_by_hour()['chart'] . '&chxr=0,-10,100|1,0,' . _sevenday_get_visits_by_hour()['biggest'] . '&chdl=Visits+by+Hour&chdlp=b&chm=R,F1F0F0,0,0.335,0.795';
+      break;
+  }
   
-  $pdf->SetFont('DroidSans', '', 9.5);
-  $pdf->Text(11,66,'This is just to show you what 85 letter characters looks like, this is all the space.');
-  $pdf->Text(11,104,'This is just to show you what 85 letter characters looks like, this is all the space.');
-  $pdf->Text(11,167,'This is just to show you what 85 letter characters looks like, this is all the space.');
-  
-  $pdf->SetTextColor(241, 241, 241);
-  $pdf->SetFont('Glyphish', '', 155);
-  $pdf->Text(160,262.5,'(');
-  
-  $pdf->SetFont('DroidSans', '', 10);
-  $pdf->SetTextColor(51, 51, 51);
-  $pdf->Text(11,232,'- This is just to show you what 120 letter characters looks like, this is all the space you have to compose your thoughts.');
-  $pdf->Text(11,239,'- This is just to show you what 120 letter characters looks like, this is all the space you have to compose your thoughts.');
-  $pdf->Text(11,246,'- This is just to show you what 120 letter characters looks like, this is all the space you have to compose your thoughts.');
-  $pdf->Text(11,253,'- This is just to show you what 120 letter characters looks like, this is all the space you have to compose your thoughts.');
-  
-  $pdf->SetFont('DroidSans', '', 30);
-  $pdf->SetTextColor(236, 175, 86);
-  $pdf->Text(35,80,'63');
-  $pdf->SetTextColor(113, 162, 97);
-  $pdf->Text(75,80,'19');
-  $pdf->SetTextColor(62, 109, 156);
-  $pdf->Text(115,80,'9');
-  $pdf->SetTextColor(129, 86, 138);
-  $pdf->Text(34,120,number_format(_sevenday_get_total_visits(-8, -1, TRUE)));
-  $pdf->SetTextColor(113, 162, 97);
-  $pdf->Text(95,120,number_format(_sevenday_get_total_visits()));
-  $pdf->SetTextColor(62, 109, 156);
-  $pdf->Text(34,141,_sevenday_get_time_on_site());
-  $pdf->Text(95,141,_sevenday_get_percent_of_mobile() . '%');
-  $pdf->SetTextColor(59, 89, 146);
-  $pdf->Text(34,184,number_format(_sevenday_get_page_impressions()));
-  $pdf->Text(107,184,number_format(_sevenday_get_visits_by_social_network('Facebook')));
-  $pdf->SetTextColor(220, 54, 43);
-  $pdf->Text(34,206,number_format( _sevenday_get_visits_by_search()));
-  $pdf->SetTextColor(89, 208, 237);
-  $pdf->Text(107,206,number_format(_sevenday_get_visits_by_social_network('Twitter')));
-  
-  $pdf->SetTextColor(51,51,51);
-  
-  $pdf->Image('https://chart.googleapis.com/chart?chxl=1:|Under|Over&chdl=Performance&chl=+&chxt=x,y&chf=bg,s,F0F0F0&chs=300x150&cht=gm&chco=333333,C64445|EBAE55|70A160&chd=t:80&chdlp=b&chma=|0,5#.png', 161, 22, 43);
-  $pdf->SetFont('DroidSans', '', 16);
-  $pdf->Text(128,37,'7 DAY DIGEST');
-  
-  $pdf->SetFont('DroidSans', 'B', 8);
-  $pdf->Text(35,84,'Registered');
-  $pdf->Text(75,84,'Total Posts');
-  $pdf->Text(115,84,'In the Forum');
-  $pdf->Text(34,124,'Articles Read');
-  $pdf->Text(95,124,'Total Impressions');
-  $pdf->Text(34,145,'Average Visit Length');
-  $pdf->Text(95,145,'Mobile Visitors');
-  $pdf->Text(34,188,'Page Impressions');
-  $pdf->Text(107,188,'Pageviews from Facebook');
-  $pdf->Text(34,210,'Search Impressions');
-  $pdf->Text(107,210,'Twitter Pageviews');
-  
-  $pdf->SetFont('Glyphish', '', 50);
-  
-  $pdf->SetTextColor(236, 175, 86);
-  $pdf->Text(14,82,'}');
-  $pdf->SetTextColor(113, 162, 97);
-  $pdf->Text(56,83,'d');
-  $pdf->SetTextColor(62, 109, 156);
-  $pdf->Text(95,82,'µ');
-  $pdf->SetTextColor(129, 86, 138);
-  $pdf->Text(14,122,'B');
-  $pdf->SetTextColor(113, 162, 97);
-  $pdf->Text(76,122,'L');
-  $pdf->SetTextColor(62, 109, 156);
-  $pdf->Text(14,143,'o');
-  $pdf->Text(76,144,'i');
-  $pdf->SetTextColor(59, 89, 146);
-  $pdf->Text(87, 186,'L');
-  
-  $pdf->AddFont('Zocial');
-  $pdf->SetFont('Zocial', '', 30);
-  
-  $pdf->SetTextColor(59, 89, 146);
-  $pdf->Text(19, 183,'f');
-  $pdf->SetTextColor(220, 54, 43);
-  $pdf->Text(21, 206,'G');
-  $pdf->SetTextColor(89, 208, 237);
-  $pdf->Text(90, 206,'T');
-  
-  // 7-day health meter.
-  $pdf->Image('https://chart.googleapis.com/chart?chf=bg,s,FFFFFF&chs=250x150&cht=gm&chco=333333,C64445|EBAE55|70A160&chd=t:90&chdlp=b&chma=|0,5#.png', 10, 53, 15);
-  $pdf->Image('https://chart.googleapis.com/chart?chf=bg,s,FFFFFF&chs=250x150&cht=gm&chco=333333,C64445|EBAE55|70A160&chd=t:' . _sevenday_visitor_overview() . '&chdlp=b&chma=|0,5#.png', 10, 91, 15);
-  $pdf->Image('https://chart.googleapis.com/chart?chf=bg,s,FFFFFF&chs=250x150&cht=gm&chco=333333,C64445|EBAE55|70A160&chd=t:90&chdlp=b&chma=|0,5#.png', 10, 154, 15);
-  
-  // Overview of registered users and posts.
-  $pdf->Image('https://chart.googleapis.com/chart?chxl=0:|Fr|Sa|Su|Mo|Tu|We|Th&chxr=0,-10,100&chxs=0,676767,12,0,lt,676767&chxt=x,y&chbh=a,7&chs=400x180&cht=bvs&chco=3E6D9C,71A261,ECAF56&chds=0,35,0,35,0,35&chd=t2:19,4,1,1,3,2,3|9,1,0,0,4,5,1|8,11,9,9,8,27,19&chdl=Forum+Posts|Other+Posts|Registrations&chdlp=b&chm=D,ECAF56,2,0,6,1#.png', 141, 62, 65);
-  
-  // Visitors by day of week.
-  $pdf->Image('http://chart.googleapis.com/chart?chxl=0:|Fr|Sa|Su|Mo|Tu|We|Th&chxr=0,-10,100&chxs=0,676767,12,0,lt,676767&chxt=x,y&chbh=a,7,9&chs=400x170&cht=bvg&chco=3E6D9C,71A261&chds=0,' . _sevenday_get_visits_by_day()['biggest'] . ',0,' . _sevenday_get_visits_by_day()['biggest'] . '&chxr=0,-10,100|1,0,' . _sevenday_get_visits_by_day()['biggest'] . '&chd=t:' . _sevenday_get_visits_by_day(TRUE)['chart'] . '|' . _sevenday_get_visits_by_day()['chart'] . '&chdl=Article+Reads|Total+Impressions&chdlp=b&chma=|0,10#.png', 141, 103, 65);
-
-  // Breakdown of visitors by time of day.
-  $pdf->Image('http://chart.googleapis.com/chart?chxl=0:|AM|1|2|3|4|5|6|7|8|9|10|11|PM|1|2|3|4|5|6|7|8|9|10|11&chxt=x,y&chbh=a,7,10&chs=400x120&cht=bvs&chco=3E6D9C&chds=0,' . _sevenday_get_visits_by_hour()['biggest'] . '&chd=t:' . _sevenday_get_visits_by_hour()['chart'] . '&chxr=0,-10,100|1,0,' . _sevenday_get_visits_by_hour()['biggest'] . '&chdl=Visits+by+Hour&chdlp=b&chm=R,F1F0F0,0,0.335,0.795#.png', 141, 136, 65);
-  
-  // Print the Top Referrers section.
-  $pdf->SetFillColor(241, 241, 241);
-  $pdf->SetTextColor(51,51,51);
-  $pdf->SetFont('DroidSans', 'B', 8);
-  $pdf->SetXY(155,165);
-  $pdf->SetFillColor(51,51,51);
-  $pdf->SetTextColor(255,255,255);
-  $pdf->Cell(50,4,'Top 5 Referrers',0,2,'C','true');
-  $pdf->SetFillColor(241, 241, 241);
-  $pdf->SetTextColor(51,51,51);
-  $pdf->SetFont('DroidSans', '', 7);
-  $pdf->Cell(50,4,$referrers[0]['source'] . ' - ' . $referrers[0][visits],0,2,'C');
-  $pdf->Cell(50,4,$referrers[1]['source'] . ' - ' . $referrers[1][visits],0,2,'C','true');
-  $pdf->Cell(50,4,$referrers[2]['source'] . ' - ' . $referrers[2][visits],0,2,'C');
-  $pdf->Cell(50,4,$referrers[3]['source'] . ' - ' . $referrers[3][visits],0,2,'C','true');
-  $pdf->Cell(50,4,$referrers[4]['source'] . ' - ' . $referrers[4][visits],0,2,'C');
-  
-  // Print the Top Story section.
-  $article_path = drupal_get_normal_path(ltrim(_sevenday_get_top_article()[0]['pagePath'],'/'));
-  $article = menu_get_object('node', 1, $article_path);
-  
-  $pdf->Image(image_style_path('600x250', $article->field_image['und'][0]['uri']), 155, 192, 50);
-  $pdf->SetXY(155,215);
-  $pdf->SetFont('DroidSans', 'B', 7);
-  $pdf->Cell(50,1,'Most Read Article - ' . _sevenday_get_top_article()[0]['pageviews'] . ' reads',0,0,'C');
-	
-	$pdf->Output();
-	
-	return;
+  $charturl .= '#.png';
+  return $charturl;
 }
 
 function _sevenday_get_total_visits($start_date = -8, $end_date = -1, $articles_only = FALSE) {
@@ -275,10 +333,10 @@ function _sevenday_get_percent_of_mobile() {
 
 function _sevenday_get_top_referrers() {
   $params = array(
-    'metrics' => array('ga:visits'),
-    'dimensions' => array('ga:source', 'ga:medium'),
-    'sort_metric' => array('-ga:visits'),
-    'filters' => 'ga:medium==referral',
+    'metrics' => array('ga:pageviews'),
+    'dimensions' => array('ga:medium', 'ga:source'),
+    'sort_metric' => array('-ga:pageviews'),
+    'filters' => 'ga:medium!=(none)',
     'start_date' => strtotime('-8 days'),
     'end_date' => strtotime('-1 day'),
     'max_results' => 5,
@@ -287,6 +345,16 @@ function _sevenday_get_top_referrers() {
   if ($feed->error) {
     return FALSE;
   }
+  
+  foreach ($feed->results->rows as $row => $value) {
+    if ($value['source'] == 'social') {
+      $feed->results->rows[$row]['source'] .= ' (' . $feed->results->rows[$row]['medium'] . ')';
+    }
+    else if ($value['source'] == 'google') {
+      $feed->results->rows[$row]['source'] .= ' (organic)';
+    }
+  }
+  
   return $feed->results->rows;
 }
 
@@ -372,16 +440,16 @@ function _sevenday_get_visits_by_hour() {
   );
 }
 
-function _sevenday_get_visits_by_social_network($filter) {
+function _sevenday_get_visits_by_social_network($filter, $start_date = -8, $end_date = -1) {
   $params = array(
     'metrics' => array('ga:pageviews'),
-    'dimensions' => array('ga:socialNetwork'),
-    'start_date' => strtotime('-8 days'),
-    'end_date' => strtotime('-1 day'),
+    'dimensions' => array('ga:socialNetwork', 'ga:medium'),
+    'start_date' => strtotime($start_date . ' days'),
+    'end_date' => strtotime($end_date . ' day'),
   );
   
   if ($filter) {
-    $params['filters'] = 'ga:socialNetwork==' . $filter;
+    $params['filters'] = 'ga:socialNetwork==' . $filter . ',ga:medium==' . strtolower($filter);
   }
 
   $feed = google_analytics_api_report_data($params);
@@ -390,8 +458,14 @@ function _sevenday_get_visits_by_social_network($filter) {
     return FALSE;
   }
   
+  $pageviewcount = 0;
+  
+  foreach ($feed->results->rows as $network) {
+    $pageviewcount += $network['pageviews'];
+  }
+  
   if ($filter) {
-    return $feed->results->rows[0]['pageviews'];
+    return $pageviewcount;
   } else {
     return $feed->results->rows;
   }
@@ -447,13 +521,21 @@ function _sevenday_get_page_impressions() {
     
     $reqdata = json_decode(file_get_contents($graph_url));
     
-    return $reqdata->data[0]->values[2]->value;
+    return $reqdata->data[0]->values[0]->value;
    }
    else {
       return "ERR";
    }
 }
 
+function _sevenday_user_overview() {
+  return (68/77)*50;
+}
+
 function _sevenday_visitor_overview() {
   return (_sevenday_get_total_visits()/_sevenday_get_total_visits(-15, -8))*100;
+}
+
+function _sevenday_social_overview() {
+  return (_sevenday_get_visits_by_social_network('Facebook')/_sevenday_get_visits_by_social_network('Facebook', -15, -8))*100;
 }
