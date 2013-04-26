@@ -103,7 +103,7 @@ function _sevenday_get_new_members($start_date = -8, $end_date = -1) {
 }
 
 function _sevenday_get_new_members_by_day() {
-  for ($i = -7; $i <= -1; $i++) {
+  for ($i = -8; $i <= -2; $i++) {
     $query = db_select('users', 'u');
     $query->fields('u', array('name', 'created'))
       ->condition('u.created', strtotime($i . ' days')+86400, '<=')
@@ -139,7 +139,7 @@ function _sevenday_get_new_posts($type = FALSE, $start_date = -8, $end_date = -1
 }
 
 function _sevenday_get_new_posts_by_day() {
-  for ($i = -7; $i <= -1; $i++) {
+  for ($i = -8; $i <= -2; $i++) {
     $other_query = db_select('node', 'n');
     $other_query->fields('n', array('title', 'created'))
       ->condition('n.created', strtotime($i . ' days')+86400, '<=')
@@ -417,7 +417,11 @@ function _sevenday_get_page_impressions() {
     
     $reqdata = json_decode(file_get_contents($graph_url));
     
-    return $reqdata->data[0]->values[0]->value;
+    if ($reqdata->data[0]->values[0]->value) {
+      return $reqdata->data[0]->values[0]->value;
+    } else {
+      return "ERR";
+    }
    }
    else {
       return "ERR";
