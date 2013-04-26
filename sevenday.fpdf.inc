@@ -184,16 +184,16 @@ class PDF extends FPDF {
     
     $this->SetFont('DroidSans', '', 9.5);
     $this->SetTextColor(171,171,171);
-    $this->Text(11,66,'Large amount of new signups from FUEL and NASCAR story repurposing.');
-    $this->Text(11,104,'Large amount of article reads thanks to heavy linking in FUEL #1.');
-    $this->Text(11,167,'Two weeks after deployment, FUEL #1 the highest referring source!');
+    $this->Text(11,66,variable_get('sevenday_observations_user'));
+    $this->Text(11,104,variable_get('sevenday_observations_visitor'));
+    $this->Text(11,167,variable_get('sevenday_observations_social'));
     
     $this->SetFont('DroidSans', '', 10);
     $this->SetTextColor(51, 51, 51);
-    $this->Text(11,232,'- The integration in FUEL #1 was a huge success and led to a large amount of traffic and our most-read article.');
-    $this->Text(11,239,'- NASCAR repurposed Buz McKim interview which brought in a large amount of new visitors and site exposure.');
-    $this->Text(11,246,'- Continuing to see an increase in visitors from organic Google, Bing and Yahoo search results.');
-    $this->Text(11,253,'- 22 visitors sent to ChevroletPerformance.com; 9 visited the COPO Signup form.');
+    $this->Text(11,232,'- ' . variable_get('sevenday_observations_period1'));
+    $this->Text(11,239,'- ' . variable_get('sevenday_observations_period2'));
+    $this->Text(11,246,'- ' . variable_get('sevenday_observations_period3'));
+    $this->Text(11,253,'- ' . variable_get('sevenday_observations_period4'));
   }
   function AcceptPageBreak() {
     return false;

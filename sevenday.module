@@ -1,14 +1,28 @@
 <?php
 function sevenday_permission() {
-	return array(
-		'access printout' => array(
-			'title' => t('Access Seven Day Report'),
-			'description' => t('Allow users to view seven day report PDF'),
-		),
-	);
+  return array(
+    'generate sevenday report' => array(
+      'title' => t('Generate Seven Day Report'),
+      'description' => t('Allow users to generate a seven day report PDF'),
+    ),
+    'access printout' => array(
+      'title' => t('Access Seven Day Report'),
+      'description' => t('Allow users to view seven day report PDF'),
+    ),
+  );
 }
 
 function sevenday_menu() {
+  // Admin menu interface
+  $items['admin/reports/sevenday'] = array(
+    'title' => 'Seven Day Snapshot',
+    'description' => 'Generate a seven day snapshot.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sevenday_generate_form'),
+    'access arguments' => array('generate sevenday report'),
+    'file' => 'sevenday.admin.inc',
+  );
+  // Seven Day report PDF page
 	$items['admin/reports/sevenday.pdf'] = array(
 		'page callback' => 'sevenday_pdf',
 		'access arguments' => array('access printout'),
